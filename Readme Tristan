@@ -1,0 +1,8 @@
+	Tu travaillera dans le dossier Autres blends/tests vidéo.
+	Commence par utiliser le blend qu'il y a à l'intérieur.
+	Les extraits de vidéos sont dans ./Datas/Video
+	
+	Ton travail:
+	
+	Créer une méthode python si possible qui permette de lire une vidéo chargée en mémoire sur la face, de pouvoir inverser les pixels de l'image, de pouvoir choisir à quelle frame elle commence, combien de temps elle dure et sa priorité (un simple int).
+	Bonus: Supprimer un certain range de proportion de vert dans l'image, mais je ne te demande pas de résultats pour le 22 mars.

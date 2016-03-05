@@ -1,0 +1,11 @@
+uniform sampler2D bgl_LuminanceTexture;
+uniform sampler2D bgl_RenderedTexture;
+float avgL = .4;
+float HDRamount = .5;
+vec2 texcoord = vec2(gl_TexCoord[0]).st;
+void main(void) {
+    float contrast = avgL;
+    float brightness = avgL * HDRamount;
+    vec4 value = texture2D(bgl_RenderedTexture, texcoord);
+    gl_FragColor = (value/contrast)-brightness*.9;
+}

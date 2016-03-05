@@ -1,0 +1,24 @@
+author = creeperdeking
+email = alexis.gros99@gmail.com
+
+p1.class = default
+p1.key.left = Q
+p1.key.right = D
+p1.key.spe1 = Z
+p1.key.spe2 = S
+p1.key.spe3 = A
+p1.key.spe4 = E
+p1.key.spe5 = G
+p1.key.spe6 = C
+p1.key.jump = space
+
+p2.class = default
+p2.key.left = K
+p2.key.right = M
+p2.key.spe1 = O
+p2.key.spe2 = L
+p2.key.spe3 = I
+p2.key.spe4 = P
+p2.key.spe5 = enter
+p2.key.spe6 = J
+p2.key.jump = rctrl

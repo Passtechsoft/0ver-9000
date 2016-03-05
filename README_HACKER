@@ -1,0 +1,7 @@
+
+If you want to create a new level, you have to follow those rules:
+    
+    - Your level must be designed to be playable in the x axis
+    - Your camera need to have the same caraceristics that those of the others levels
+    - /!\ important/!\ you have to rename your camera "Camera_"+ [your level name] and all objects in your level should begin by [your level name] + "_"
+    - You have to set spawnpoints for your players, create two empty (with the same y coordinates) and name them [your level name]+"_spawnPos_p1" and [your level name]+"_spawnPos_p2"

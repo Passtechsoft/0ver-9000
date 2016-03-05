@@ -1,0 +1,25 @@
+Questions:
+    - comment parcourir un dictionnaire.
+        for item in dict:
+            print(item)
+        dict.keys[0]
+    - Commet connaître l'existence d'une variable sans erreurs
+        if hasattr("name", bge.logic)
+        
+    - fonctions mathématiques (round)
+        from math import *
+        round(x)
+        ceil(x)
+        floor(x)
+    - Comment créer des instances d'objets '
+        obj = Class(arg)
+
+Implement fighting:
+    - implement hit animations
+    - implement the complexes fight behaviour, for the game feel
+Implement menus
+    - Implement the demo version
+    - Implement the
+Implement rethoric and charisma bar
+Implement videos, and also transparence
+

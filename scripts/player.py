@@ -9,16 +9,23 @@ def getKeyProp(playerName, propName):
 def checkKeyboard(keyCode):
     return logic.KX_INPUT_ACTIVE == keyboard.events[keyCode]
 
+
 class Player:
     
     def __init__(self, player="player 1", name = "Jostophe"):
-	self.create(player, name)
+        self.create(player, name)
         
     def create(self, player, name):
         self.name = name
         self.className = "default"
         self.player = player # player 1 or player 2
         self.prefix = "p" + Utils.getWord(1,player)
+        
+        #if value is 1, it mean that the hitboxes are touched by the bottom hitbox of the other player, and the 2 and 3 refer to higher hitboxes on the reffearing player
+        hitboxes = [0, 0, 0]
+        
+        #if vault 0, we are looking to the right, else, we look to the left
+        self.front = 0
         
         #argument, life and mana:
         self.argumentNbr = 3
@@ -46,16 +53,18 @@ class Player:
         self.className = "default"
             
         self.tmpCombo = [] # A integrer table storing the actuall key strokes    
-        self.cPowers = {"Z,S:Z,S", "S,space,S,S", "Z,Z", "Z,S,Z,S"}
-        self.cCPowers = [[],[],[],[]]
-        self.cPowerCheck = [0, 0, 0, 0]
+        self.cPowers = {"Z", "Z,S:Z,S", "S,space,S,S", "Z,Z", "Z,S,Z,S"}
+        self.cCPowers = [[],[],[],[],[]]
+        self.cPowerCheck = [0, 0, 0, 0, 0]
         self.dPower = 30 # implement later 
-        self.cUltimate = "Z,Z:S,Z:space,space"# The ultimate combo
         self.dUltimate = 300
         
         self.compileCPower()
         self.updateLifeBar()
         
+    #def refreshHitboxes():
+        
+    
     #Called when changes are made to CPower
     def compileCPower(self):
         #Here we convert the absolute Keys cPower into keys relative to the actual player
@@ -94,7 +103,7 @@ class Player:
                     self.cCPowers[cp].append(getKeyProp(self.player, "right"))
                 else:
                     print("Warning!!! in Player::CompileCPower, unknown key"+v+", input ignored")
-        print("cCpower for "+self.player+":")
+        print("\n cCpowers for "+self.player+":")
         for i in self.cCPowers:
             print(i)
             
@@ -106,19 +115,17 @@ class Player:
         
         sensor = Game.getCurrentController().sensors["collision joueur"]
         if self.waitKey >= 10:
-            
             if logic.KX_INPUT_ACTIVE == keyboard.events[Game.keys[self.prefix+".key.left"]]:
+                self.front = 0
                 self.checkAttacks(Game.keys[self.prefix+".key.left"])
             if logic.KX_INPUT_ACTIVE == keyboard.events[Game.keys[self.prefix+".key.right"]]:
+                self.front = 1
                 self.checkAttacks( Game.keys[self.prefix+".key.right"])
             if sensor.positive: # collision
                 if logic.KX_INPUT_ACTIVE == keyboard.events[Game.keys[self.prefix+".key.spe1"]]:
                     self.checkAttacks( Game.keys[self.prefix+".key.spe1"])
                     player = Game.getCurrentController().owner
-                    if self.player == "player 1":
-                        self.hitEnemy("player 2", self.hitPower)
-                    elif self.player == "player 2":
-                        self.hitEnemy("player 1", self.hitPower)
+                    self.hitEnemy(self.getEnemy(), self.hitPower)
                     self.waitKey = 0
         else:
             self.waitKey += 1
@@ -127,12 +134,13 @@ class Player:
     
     def hitEnemy(self, playerName, power):
         scene = Game.getCurrentScene()
-        self.beHit = 0
-        if self.argument <= 0:
-            if self.beHit == 0:
-                if self.argumentNbr >= 0:
-                    self.argument = self.default_argument
-        scene.objects[ Game.scenePrefix+playerName]["class"].attack(power)
+        if abs(self.front - scene.objects[self.getTarget()].front) == 1:
+            self.beHit = 0
+            if self.argument <= 0:
+                if self.beHit == 0:
+                    if self.argumentNbr >= 0:
+                        self.argument = self.default_argument
+            scene.objects[ Game.scenePrefix+playerName]["class"].attack(power)
         self.updateLifeBar()
         
     #called by the enemy, this function substract the attackPower amount of life from argument or life bar
@@ -159,6 +167,12 @@ class Player:
         self.beHit = 1
         self.updateLifeBar()
         
+    def getEnemy(self):
+        if self.player == "player 1":
+            return "player 2"
+        else:
+            return "player 1"
+        
     def checkAttacks(self, char):
         print("checkCombo!!!"+str(self.checkCombo(char)))
         #if checkKeyboard(Game.keys[self.prefix+".key.left"])
@@ -169,34 +183,29 @@ class Player:
         checkCombos = 0
         returnTrue = 0
         
+        #Parsing the Compiled power table:
         for cptr, i in enumerate(self.cCPowers):
-	    #If the current key is the combo, we just play it
-            if i == self.tmpCombo+char:
+            #If the current key is the combo, we just play it
+            kk = self.tmpCombo
+            kk.append(char)
+            if i == kk:
                 returnTrue = 1
-                self.power(cptr)
-	    #if we are in te way to complete a combo
+                if cptr == 0:
+                    self.ultimate(self.getEnemy())
+                self.power(cptr, self.getEnemy())
+            #if we are on way to complete a combo
             else:
-		checker = 1
-		for tr, co in enumerate(self.tmpCombo):
-		    if co != i[tr]:
-			checker = 0
-		if checker == 1:
-		    self.cPowerCheck[cptr] += 1
-		    checkCombos = 1
-        
-        
-        if self.cUltimate == tmpCombo+char:
-            checkCombo = 1
-            self.ultimate()
-	else:
-	    checker = 1
-	    for tr, co in enumerate(self.tmpCombo):
-		if co != cUltimate[tr]:
-		    checker = 0
-	    if checker == 1:
-		checkCombo = 1
-	      
-        if checkCombo == 0:
+                checker = 1
+                for tr, co in enumerate(self.tmpCombo):
+                    if tr == len(i):
+                        break
+                    if co != i[tr]:
+                        checker = 0
+                if checker == 1:
+                    self.cPowerCheck[cptr] += 1
+                    checkCombos = 1
+                    
+        if checkCombos == 0:
             self.tmpCombo = []
         self.updateLifeBar()
         return returnTrue
@@ -204,11 +213,11 @@ class Player:
     #Called to apply a power-effect
     def power(self, nbr, target):
         print("F-F-F-F-FATALITY!")
-        print("power "+str(nbr)+" to "+target.name)
+        print("power "+str(nbr)+" from " + self.player +" to "+target.name)
 
     #Called to apply the ULTIMATE effect
     def ultimate(self, target):
-        print("U-U-U-Ulitimate from "+player+" to "+target.name+" with love <3")
+        print("U-U-U-Ulitimate from "+self.player+" to "+target.name+" with love <3")
 
     #called when the life has been changed
     def updateLifeBar(self):
@@ -224,8 +233,8 @@ class Player:
         #scene.active_camera = scene.objects["CAMERANAME"]
         overLayScene = Game.getSceneList()[1]
         
-        #applying the amount of argument on the argument bar & shields:
-        if self.old_argument <= 0 and self.argument == self.default_argument:
+        #applying the amount of argument on the argument bar & argument shields:
+        if self.old_argument <= 0 and self.argument >= self.default_argument:
             overLayScene.objects["player 2_argument_bar_hide"].playAction(self.player+"_argument_action", 0, 20)
         else:
             limit = overLayScene.objects[self.player+"_limite_jauge_argument"].position.z
@@ -252,7 +261,7 @@ class Player:
             elif ob.position.z < ref.position.z + 10:
                 if remainingQuarters < i:
                     for y in range(1,9):
-                        overLayScene.addObject( overLayScene.objectsInactive["explode_life_"+str(y)], ob, 30)
+                        overLayScene.addObject( overLayScene.objectsInactive["explode_life_"+str(y)], ob, 40)
                     ob.position.z += 20
         self.old_life = self.life
         self.old_mana = self.mana

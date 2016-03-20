@@ -1,6 +1,5 @@
 from bge import *
 import bge.logic as Game
-import Utils
 import initPlayer
 
 
